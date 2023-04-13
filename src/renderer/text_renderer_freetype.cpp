@@ -69,6 +69,9 @@ bool TextRendererFreetype::SetFontFamily(const std::vector<std::string>& font_fa
     }
 
     font_family_ = font_family;
+    for (size_t i = 0; i < font_family.size(); ++i) {
+        log_->e("Freetype: fontfamily[%u] = %s", i, font_family_[i].c_str());
+    }
     return true;
 }
 
@@ -117,6 +120,7 @@ auto TextRendererFreetype::DrawChar(TextRenderContext& render_ctx, int target_x,
         log_->w("Freetype: Main font %s doesn't contain U+%04X", face->family_name, ucs4);
 
         if (fallback_policy == TextRenderFallbackPolicy::kFailOnCodePointNotFound) {
+            log_->e("Freetype: returning error as fallback_policy is kFailOnCodePointNotFound");
             return TextRenderStatus::kCodePointNotFound;
         }
 
@@ -125,6 +129,7 @@ auto TextRendererFreetype::DrawChar(TextRenderContext& render_ctx, int target_x,
             face = fallback_face_;
         } else if (main_face_index_ + 1 >= font_family_.size()) {
             // Fallback fonts not available
+            log_->e("Freetype: Fallback fonts not available");
             return TextRenderStatus::kCodePointNotFound;
         } else {
             // Fallback fontface not loaded, or fallback fontface doesn't contain required codepoint
